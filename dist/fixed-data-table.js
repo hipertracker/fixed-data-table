@@ -9,45 +9,54 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-var FixedDataTable =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("react"));
+	else if(typeof define === 'function' && define.amd)
+		define(["react"], factory);
+	else if(typeof exports === 'object')
+		exports["FixedDataTable"] = factory(require("react"));
+	else
+		root["FixedDataTable"] = factory(root["React"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_37__) {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -190,11 +199,12 @@ var FixedDataTable =
 	var shallowEqual = __webpack_require__(35);
 	var translateDOMPositionXY = __webpack_require__(36);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 	var ReactChildren = React.Children;
 
 	var renderToString = FixedDataTableHelper.renderToString;
 	var EMPTY_OBJECT = {};
+	var BORDER_HEIGHT = 1;
 	var COLUMN_SETTING_NAMES = [
 	  'bodyFixedColumns',
 	  'bodyScrollableColumns',
@@ -202,12 +212,14 @@ var FixedDataTable =
 	  'headScrollableColumns',
 	  'footFixedColumns',
 	  'footScrollableColumns',
+	  'groupHeaderFixedColumns',
+	  'groupHeaderScrollableColumns',
 	];
 
 	/**
 	 * Data grid component with fixed or scrollable header and columns.
 	 *
-	 * The layout of the data table is as follow:
+	 * The layout of the data table is as follows:
 	 *
 	 * ```
 	 * +---------------------------------------------------+
@@ -233,7 +245,7 @@ var FixedDataTable =
 	 *   of columns if included in the table that do not scroll
 	 *   vertically or horizontally.
 	 *
-	 * - Scrollable Column Group Header:  The header for a group of columns
+	 * - Scrollable Column Group Header: The header for a group of columns
 	 *   that do not move while scrolling vertically, but move horizontally
 	 *   with the horizontal scrolling.
 	 *
@@ -255,7 +267,7 @@ var FixedDataTable =
 	  propTypes: {
 
 	    /**
-	     * Pixel width of table. If all rows do not fit,
+	     * Pixel width of table. If all columns do not fit,
 	     * a horizontal scrollbar will appear.
 	     */
 	    width: PropTypes.number.isRequired,
@@ -277,12 +289,17 @@ var FixedDataTable =
 	    maxHeight: PropTypes.number,
 
 	    /**
-	     * Pixel height of table's owner, This is used to make sure the footer
-	     * and scrollbar of the table are visible when current space for table in
-	     * view is smaller than final height of table. It allows to avoid resizing
-	     * and reflowing table whan it is moving in the view.
+	     * Pixel height of table's owner, this is used in a managed scrolling
+	     * situation when you want to slide the table up from below the fold
+	     * without having to constantly update the height on every scroll tick.
+	     * Instead, vary this property on scroll. By using `ownerHeight`, we
+	     * over-render the table while making sure the footer and horizontal
+	     * scrollbar of the table are visible when the current space for the table
+	     * in view is smaller than the final, over-flowing height of table. It
+	     * allows us to avoid resizing and reflowing table when it is moving in the
+	     * view.
 	     *
-	     * This is used if `ownerHeight < height`.
+	     * This is used if `ownerHeight < height` (or `maxHeight`).
 	     */
 	    ownerHeight: PropTypes.number,
 
@@ -295,27 +312,27 @@ var FixedDataTable =
 	    rowsCount: PropTypes.number.isRequired,
 
 	    /**
-	     * Pixel height of rows unless rowHeightGetter is specified and returns
+	     * Pixel height of rows unless `rowHeightGetter` is specified and returns
 	     * different value.
 	     */
 	    rowHeight: PropTypes.number.isRequired,
 
 	    /**
 	     * If specified, `rowHeightGetter(index)` is called for each row and the
-	     * returned value overrides rowHeight for particular row.
+	     * returned value overrides `rowHeight` for particular row.
 	     */
 	    rowHeightGetter: PropTypes.func,
 
 	    /**
 	     * To get rows to display in table, `rowGetter(index)`
-	     * is called. rowGetter should be smart enough to handle async
-	     * fetching of data and returning temporary objects
+	     * is called. `rowGetter` should be smart enough to handle async
+	     * fetching of data and return temporary objects
 	     * while data is being fetched.
 	     */
 	    rowGetter: PropTypes.func.isRequired,
 
 	    /**
-	     * To get any additional css classes that should be added to a row,
+	     * To get any additional CSS classes that should be added to a row,
 	     * `rowClassNameGetter(index)` is called.
 	     */
 	    rowClassNameGetter: PropTypes.func,
@@ -387,14 +404,19 @@ var FixedDataTable =
 	    onRowClick: PropTypes.func,
 
 	    /**
-	     * Callback that is called when mouse down event happens above a row.
+	     * Callback that is called when a mouse-down event happens on a row.
 	     */
 	    onRowMouseDown: PropTypes.func,
 
 	    /**
-	     * Callback that is called when the mouse enters a row.
+	     * Callback that is called when a mouse-enter event happens on a row.
 	     */
 	    onRowMouseEnter: PropTypes.func,
+
+	    /**
+	     * Callback that is called when a mouse-leave event happens on a row.
+	     */
+	    onRowMouseLeave: PropTypes.func,
 
 	    /**
 	     * Callback that is called when resizer has been released
@@ -459,11 +481,14 @@ var FixedDataTable =
 	    var reservedHeight = this.state.reservedHeight;
 	    var requiredHeight = scrollContentHeight + reservedHeight;
 	    var contentHeight;
-	    if (this.state.height > requiredHeight && this.props.ownerHeight) {
+	    var useMaxHeight = this.props.height === undefined;
+	    if (useMaxHeight && this.props.maxHeight > requiredHeight) {
+	      contentHeight = requiredHeight;
+	    } else if (this.state.height > requiredHeight && this.props.ownerHeight) {
 	      contentHeight = Math.max(requiredHeight, this.props.ownerHeight);
 	    } else {
 	      var maxScrollY = scrollContentHeight - this.state.bodyHeight;
-	      contentHeight = this.props.height + maxScrollY;
+	      contentHeight = this.state.height + maxScrollY;
 	    }
 	    if (contentHeight !== this._contentHeight &&
 	        this.props.onContentHeightChange) {
@@ -536,11 +561,11 @@ var FixedDataTable =
 	    var headerOffsetTop = state.useGroupHeader ? state.groupHeaderHeight : 0;
 	    var bodyOffsetTop = headerOffsetTop + state.headerHeight;
 	    var bottomSectionOffset = 0;
-	    var footOffsetTop = bodyOffsetTop + state.bodyHeight;
+	    var footOffsetTop = bodyOffsetTop + state.bodyHeight + BORDER_HEIGHT;
 	    var rowsContainerHeight = footOffsetTop + state.footerHeight;
 
-	    if (props.ownerHeight !== undefined  && props.ownerHeight < props.height) {
-	      bottomSectionOffset = props.ownerHeight - props.height;
+	    if (props.ownerHeight !== undefined && props.ownerHeight < state.height) {
+	      bottomSectionOffset = props.ownerHeight - state.height - BORDER_HEIGHT;
 	      footOffsetTop = Math.min(
 	        footOffsetTop,
 	        scrollbarYHeight + bottomSectionOffset - state.footerHeight
@@ -623,12 +648,21 @@ var FixedDataTable =
 	        onColumnResize: this._onColumnResize}
 	      );
 
-	    var shadow;
+	    var topShadow;
+	    var bottomShadow;
 	    if (state.scrollY) {
-	      shadow =
+	      topShadow =
 	        React.createElement("div", {
-	          className: cx('fixedDataTable/shadow'), 
+	          className: cx('fixedDataTable/topShadow'), 
 	          style: {top: bodyOffsetTop}}
+	        );
+	    }
+
+	    if (state.ownerHeight < state.height || state.scrollY < maxScrollY) {
+	      bottomShadow =
+	        React.createElement("div", {
+	          className: cx('fixedDataTable/bottomShadow'), 
+	          style: {top: footOffsetTop}}
 	        );
 	    }
 
@@ -645,7 +679,8 @@ var FixedDataTable =
 	          header, 
 	          rows, 
 	          footer, 
-	          shadow
+	          topShadow, 
+	          bottomShadow
 	        ), 
 	        verticalScrollbar, 
 	        horizontalScrollbar
@@ -667,6 +702,7 @@ var FixedDataTable =
 	        onRowClick: state.onRowClick, 
 	        onRowMouseDown: state.onRowMouseDown, 
 	        onRowMouseEnter: state.onRowMouseEnter, 
+	        onRowMouseLeave: state.onRowMouseLeave, 
 	        rowClassNameGetter: state.rowClassNameGetter, 
 	        rowsCount: state.rowsCount, 
 	        rowGetter: state.rowGetter, 
@@ -674,7 +710,8 @@ var FixedDataTable =
 	        scrollLeft: state.scrollX, 
 	        scrollableColumns: state.bodyScrollableColumns, 
 	        showLastRowBorder: !state.footerHeight, 
-	        width: state.width}
+	        width: state.width, 
+	        rowPositionGetter: this._scrollHelper.getRowPosition}
 	      )
 	    );
 	  },
@@ -892,7 +929,7 @@ var FixedDataTable =
 	    var useMaxHeight = props.height === undefined;
 	    var height = useMaxHeight ? props.maxHeight : props.height;
 	    var totalHeightReserved = props.footerHeight + props.headerHeight +
-	      props.groupHeaderHeight;
+	      props.groupHeaderHeight + 2 * BORDER_HEIGHT;
 	    var bodyHeight = height - totalHeightReserved;
 	    var scrollContentHeight = this._scrollHelper.getContentHeight();
 	    var totalHeightNeeded = scrollContentHeight + totalHeightReserved;
@@ -957,10 +994,18 @@ var FixedDataTable =
 	    // new `headData` or `groupHeaderData`
 	    // if they haven't changed.
 	    if (oldState) {
-	      if (shallowEqual(oldState.headData, newState.headData)) {
+	      if (
+	        oldState.headData &&
+	        newState.headData &&
+	        shallowEqual(oldState.headData, newState.headData)
+	      ) {
 	        newState.headData = oldState.headData;
 	      }
-	      if (shallowEqual(oldState.groupHeaderData, newState.groupHeaderData)) {
+	      if (
+	        oldState.groupHeaderData &&
+	        newState.groupHeaderData &&
+	        shallowEqual(oldState.groupHeaderData, newState.groupHeaderData)
+	      ) {
 	        newState.groupHeaderData = oldState.groupHeaderData;
 	      }
 	    }
@@ -973,6 +1018,9 @@ var FixedDataTable =
 	    /*object*/ oldState
 	  ) /*object*/ {
 	    COLUMN_SETTING_NAMES.forEach(function(settingName)  {
+	      if (!columnInfo[settingName] || !oldState[settingName]) {
+	        return;
+	      }
 	      if (columnInfo[settingName].length === oldState[settingName].length) {
 	        var canReuse = true;
 	        for (var index = 0; index < columnInfo[settingName].length; ++index) {
@@ -1202,7 +1250,7 @@ var FixedDataTable =
 
 	var React = __webpack_require__(19);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	/**
 	 * Component that defines the attributes of table column.
@@ -1256,6 +1304,11 @@ var FixedDataTable =
 	      PropTypes.string,
 	      PropTypes.number,
 	    ]).isRequired,
+
+	    /**
+	     * Controls if the column is fixed when scrolling in the X axis.
+	     */
+	    fixed: PropTypes.bool,
 
 	    /**
 	     * The cell renderer that returns React-renderable content for table column
@@ -1328,6 +1381,12 @@ var FixedDataTable =
 	    isResizable: PropTypes.bool,
 	  },
 
+	  getDefaultProps:function() /*object*/ {
+	    return {
+	      fixed: false,
+	    };
+	  },
+
 	  render:function() {
 	    if (false) {
 	      throw new Error(
@@ -1359,7 +1418,7 @@ var FixedDataTable =
 
 	var React = __webpack_require__(19);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	/**
 	 * Component that defines the attributes of a table column group.
@@ -1376,9 +1435,9 @@ var FixedDataTable =
 	    align: PropTypes.oneOf(['left', 'center', 'right']),
 
 	    /**
-	     * Whether the column group is fixed.
+	     * Controls if the column group is fixed when scrolling in the X axis.
 	     */
-	    fixed: PropTypes.bool.isRequired,
+	    fixed: PropTypes.bool,
 
 	    /**
 	     * Bucket for any data to be passed into column group renderer functions.
@@ -1405,6 +1464,12 @@ var FixedDataTable =
 	     * ```
 	     */
 	    groupHeaderRenderer: PropTypes.func,
+	  },
+
+	  getDefaultProps:function() /*object*/ {
+	    return {
+	      fixed: false,
+	    };
 	  },
 
 	  render:function() {
@@ -1486,9 +1551,9 @@ var FixedDataTable =
 	 */
 	function forEachColumn(children, callback) {
 	  React.Children.forEach(children, function(child)  {
-	    if (child.type === FixedDataTableColumnGroup.type) {
+	    if (child.type === FixedDataTableColumnGroup) {
 	      forEachColumn(child.props.children, callback);
-	    } else if (child.type === FixedDataTableColumn.type) {
+	    } else if (child.type === FixedDataTableColumn) {
 	      callback(child);
 	    }
 	  });
@@ -1511,7 +1576,7 @@ var FixedDataTable =
 	    // The child is either a column group or a column. If it is a column group
 	    // we need to iterate over its columns and then potentially generate a
 	    // new column group
-	    if (originalChild.type === FixedDataTableColumnGroup.type) {
+	    if (originalChild.type === FixedDataTableColumnGroup) {
 	      var haveColumnsChanged = false;
 	      var newColumns = [];
 
@@ -1528,7 +1593,7 @@ var FixedDataTable =
 	      if (haveColumnsChanged) {
 	        newChild = cloneWithProps(originalChild, {children: newColumns});
 	      }
-	    } else if (originalChild.type === FixedDataTableColumn.type) {
+	    } else if (originalChild.type === FixedDataTableColumn) {
 	      newChild = callback(originalChild);
 	    }
 
@@ -1604,6 +1669,9 @@ var FixedDataTable =
 	 * This source code is licensed under the BSD-style license found in the
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * This is utility that hanlds onWheel events and calls provided wheel
+	 * callback with correct frame rate.
 	 *
 	 * @providesModule ReactWheelHandler
 	 * @typechecks
@@ -1687,18 +1755,18 @@ var FixedDataTable =
 	 * @typechecks
 	 */
 
-	var DOMMouseMoveTracker = __webpack_require__(38);
-	var Keys = __webpack_require__(39);
+	var DOMMouseMoveTracker = __webpack_require__(40);
+	var Keys = __webpack_require__(41);
 	var React = __webpack_require__(19);
 	var ReactComponentWithPureRenderMixin = __webpack_require__(22);
 	var ReactWheelHandler = __webpack_require__(23);
 
-	var cssVar = __webpack_require__(40);
+	var cssVar = __webpack_require__(42);
 	var cx = __webpack_require__(31);
 	var emptyFunction = __webpack_require__(33);
 	var translateDOMPositionXY = __webpack_require__(36);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	var UNSCROLLABLE_STATE = {
 	  position: 0,
@@ -2173,14 +2241,15 @@ var FixedDataTable =
 	 */
 
 	var React = __webpack_require__(19);
-	var FixedDataTableRowBuffer = __webpack_require__(41);
+	var FixedDataTableRowBuffer = __webpack_require__(38);
 	var FixedDataTableRow = __webpack_require__(27);
 
 	var cx = __webpack_require__(31);
 	var emptyFunction = __webpack_require__(33);
-	var joinClasses = __webpack_require__(42);
+	var joinClasses = __webpack_require__(39);
+	var translateDOMPositionXY = __webpack_require__(36);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	var FixedDataTableBufferedRows = React.createClass({displayName: "FixedDataTableBufferedRows",
 
@@ -2194,10 +2263,12 @@ var FixedDataTable =
 	    onRowClick: PropTypes.func,
 	    onRowMouseDown: PropTypes.func,
 	    onRowMouseEnter: PropTypes.func,
+	    onRowMouseLeave: PropTypes.func,
 	    rowClassNameGetter: PropTypes.func,
 	    rowsCount: PropTypes.number.isRequired,
 	    rowGetter: PropTypes.func.isRequired,
 	    rowHeightGetter: PropTypes.func,
+	    rowPositionGetter: PropTypes.func.isRequired,
 	    scrollLeft: PropTypes.number.isRequired,
 	    scrollableColumns: PropTypes.array.isRequired,
 	    showLastRowBorder: PropTypes.bool,
@@ -2225,7 +2296,7 @@ var FixedDataTable =
 	  },
 
 	  componentDidMount:function() {
-	    this._bufferUpdateTimer = setTimeout(this._updateBuffer, 500);
+	    this._bufferUpdateTimer = setTimeout(this._updateBuffer, 1000);
 	  },
 
 	  componentWillReceiveProps:function(/*object*/ nextProps) {
@@ -2272,18 +2343,17 @@ var FixedDataTable =
 
 	  render:function() /*object*/ {
 	    var props = this.props;
-	    var offsetTop = props.offsetTop;
 	    var rowClassNameGetter = props.rowClassNameGetter || emptyFunction;
 	    var rowGetter = props.rowGetter;
+	    var rowPositionGetter = props.rowPositionGetter;
 
 	    var rowsToRender = this.state.rowsToRender;
 	    this._staticRowArray.length = rowsToRender.length;
 
 	    for (var i = 0; i < rowsToRender.length; ++i) {
-	      var rowInfo = rowsToRender[i];
-	      var rowIndex = rowInfo.rowIndex;
-	      var rowOffsetTop = rowInfo.offsetTop;
+	      var rowIndex = rowsToRender[i];
 	      var currentRowHeight = this._getRowHeight(rowIndex);
+	      var rowOffsetTop = rowPositionGetter(rowIndex);
 
 	      var hasBottomBorder =
 	        rowIndex === props.rowsCount - 1 && props.showLastRowBorder;
@@ -2296,12 +2366,13 @@ var FixedDataTable =
 	          width: props.width, 
 	          height: currentRowHeight, 
 	          scrollLeft: Math.round(props.scrollLeft), 
-	          offsetTop: Math.round(offsetTop + rowOffsetTop), 
+	          offsetTop: Math.round(rowOffsetTop), 
 	          fixedColumns: props.fixedColumns, 
 	          scrollableColumns: props.scrollableColumns, 
 	          onClick: props.onRowClick, 
 	          onMouseDown: props.onRowMouseDown, 
 	          onMouseEnter: props.onRowMouseEnter, 
+	          onMouseLeave: props.onRowMouseLeave, 
 	          className: joinClasses(
 	            rowClassNameGetter(rowIndex),
 	            cx('public/fixedDataTable/bodyRow'),
@@ -2310,7 +2381,19 @@ var FixedDataTable =
 	        );
 	    }
 
-	    return React.createElement("div", null, this._staticRowArray);
+	    var firstRowPosition = props.rowPositionGetter(props.firstRowIndex);
+
+	    var style = {
+	      position: 'absolute',
+	    };
+
+	    translateDOMPositionXY(
+	      style,
+	      0,
+	      props.firstRowOffset - firstRowPosition + props.offsetTop
+	    );
+
+	    return React.createElement("div", {style: style}, this._staticRowArray);
 	  },
 
 	  _getRowHeight:function(/*number*/ index) /*number*/ {
@@ -2343,7 +2426,7 @@ var FixedDataTable =
 	 * @typechecks
 	 */
 
-	var DOMMouseMoveTracker = __webpack_require__(38);
+	var DOMMouseMoveTracker = __webpack_require__(40);
 	var Locale = __webpack_require__(21);
 	var React = __webpack_require__(19);
 	var ReactComponentWithPureRenderMixin = __webpack_require__(22);
@@ -2351,7 +2434,7 @@ var FixedDataTable =
 	var clamp = __webpack_require__(43);
 	var cx = __webpack_require__(31);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	var FixedDataTableColumnResizeHandle = React.createClass({displayName: "FixedDataTableColumnResizeHandle",
 	  mixins: [ReactComponentWithPureRenderMixin],
@@ -2510,8 +2593,7 @@ var FixedDataTable =
 	 * @providesModule FixedDataTableRow.react
 	 * @typechecks
 	 */
-
-	"use strict";
+	'use strict';
 
 	var FixedDataTableHelper = __webpack_require__(20);
 	var React = __webpack_require__(19);
@@ -2519,11 +2601,11 @@ var FixedDataTable =
 	var FixedDataTableCellGroup = __webpack_require__(44);
 
 	var cx = __webpack_require__(31);
-	var joinClasses = __webpack_require__(42);
+	var joinClasses = __webpack_require__(39);
 	var translateDOMPositionXY = __webpack_require__(36);
 
 	var DIR_SIGN = FixedDataTableHelper.DIR_SIGN;
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	/**
 	 * Component that renders the row for <FixedDataTable />.
@@ -2645,6 +2727,7 @@ var FixedDataTable =
 	        onClick: this.props.onClick ? this._onClick : null, 
 	        onMouseDown: this.props.onMouseDown ? this._onMouseDown : null, 
 	        onMouseEnter: this.props.onMouseEnter ? this._onMouseEnter : null, 
+	        onMouseLeave: this.props.onMouseLeave ? this._onMouseLeave : null, 
 	        style: style}, 
 	        React.createElement("div", {className: cx('fixedDataTableRow/body')}, 
 	          fixedColumns, 
@@ -2687,6 +2770,10 @@ var FixedDataTable =
 
 	  _onMouseEnter:function(/*object*/ event) {
 	    this.props.onMouseEnter(event, this.props.index, this.props.data);
+	  },
+
+	  _onMouseLeave:function(/*object*/ event) {
+	    this.props.onMouseLeave(event, this.props.index, this.props.data);
 	  },
 	});
 
@@ -2791,6 +2878,7 @@ var FixedDataTable =
 	    this.scrollToRow = this.scrollToRow.bind(this);
 	    this.setRowHeightGetter = this.setRowHeightGetter.bind(this);
 	    this.getContentHeight = this.getContentHeight.bind(this);
+	    this.getRowPosition = this.getRowPosition.bind(this);
 
 	    this.$FixedDataTableScrollHelper_updateHeightsInViewport(0, 0);
 	  }
@@ -2842,6 +2930,12 @@ var FixedDataTable =
 	      return change;
 	    }
 	    return 0;
+	  };
+
+	  FixedDataTableScrollHelper.prototype.getRowPosition=function(rowIndex)  {
+	    return (
+	      this.$FixedDataTableScrollHelper_rowOffsets.get(rowIndex).value - this.$FixedDataTableScrollHelper_rowHeightGetter(rowIndex)
+	    );
 	  };
 
 	  FixedDataTableScrollHelper.prototype.scrollBy=function(delta)  {
@@ -3436,6 +3530,15 @@ var FixedDataTable =
 	  if (objA === objB) {
 	    return true;
 	  }
+
+	  if (!objA || !objB) {
+	    return false;
+	  }
+
+	  if (typeof objA !== 'object' || typeof objB !== 'object') {
+	    return false;
+	  }
+
 	  var key;
 	  // Test for A's keys different from B.
 	  for (key in objA) {
@@ -3508,14 +3611,14 @@ var FixedDataTable =
 	})();
 
 	module.exports = translateDOMPositionXY;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = React;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
 
 /***/ },
 /* 38 */
@@ -3528,6 +3631,203 @@ var FixedDataTable =
 	 * This source code is licensed under the BSD-style license found in the
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule FixedDataTableRowBuffer
+	 * @typechecks
+	 */
+	'use strict';
+
+	var IntegerBufferSet = __webpack_require__(52);
+
+	var clamp = __webpack_require__(43);
+	var invariant = __webpack_require__(34);
+	var MIN_BUFFER_ROWS = 5;
+	var MAX_BUFFER_ROWS = 15;
+
+	// FixedDataTableRowBuffer is a helper class that executes row buffering
+	// logic for FixedDataTable. It figures out which rows should be rendered
+	// and in which positions.
+
+	  function FixedDataTableRowBuffer(
+	rowsCount,
+	    /*number*/  defaultRowHeight,
+	    /*number*/ viewportHeight,
+	    /*?function*/ rowHeightGetter)
+	   {
+	    invariant(
+	      defaultRowHeight !== 0,
+	      "defaultRowHeight musn't be equal 0 in FixedDataTableRowBuffer"
+	    );
+
+	    this.$FixedDataTableRowBuffer_bufferSet = new IntegerBufferSet();
+	    this.$FixedDataTableRowBuffer_defaultRowHeight = defaultRowHeight;
+	    this.$FixedDataTableRowBuffer_viewportRowsBegin = 0;
+	    this.$FixedDataTableRowBuffer_viewportRowsEnd = 0;
+	    this.$FixedDataTableRowBuffer_maxVisibleRowCount = Math.ceil(viewportHeight / defaultRowHeight) + 1;
+	    this.$FixedDataTableRowBuffer_bufferRowsCount = clamp(
+	      MIN_BUFFER_ROWS,
+	      Math.floor(this.$FixedDataTableRowBuffer_maxVisibleRowCount/2),
+	      MAX_BUFFER_ROWS
+	    );
+	    this.$FixedDataTableRowBuffer_rowsCount = rowsCount;
+	    this.$FixedDataTableRowBuffer_rowHeightGetter = rowHeightGetter;
+	    this.$FixedDataTableRowBuffer_rows = [];
+	    this.$FixedDataTableRowBuffer_viewportHeight = viewportHeight;
+
+	    this.getRows = this.getRows.bind(this);
+	    this.getRowsWithUpdatedBuffer = this.getRowsWithUpdatedBuffer.bind(this);
+	  }
+
+	  FixedDataTableRowBuffer.prototype.getRowsWithUpdatedBuffer=function()  {
+	    var remainingBufferRows = 2 * this.$FixedDataTableRowBuffer_bufferRowsCount;
+	    var bufferRowIndex =
+	      Math.max(this.$FixedDataTableRowBuffer_viewportRowsBegin - this.$FixedDataTableRowBuffer_bufferRowsCount, 0);
+	    while (bufferRowIndex < this.$FixedDataTableRowBuffer_viewportRowsBegin) {
+	      this.$FixedDataTableRowBuffer_addRowToBuffer(
+	        bufferRowIndex,
+	        this.$FixedDataTableRowBuffer_viewportRowsBegin,
+	        this.$FixedDataTableRowBuffer_viewportRowsEnd - 1
+	      );
+	      bufferRowIndex++;
+	      remainingBufferRows--;
+	    }
+	    bufferRowIndex = this.$FixedDataTableRowBuffer_viewportRowsEnd;
+	    while (bufferRowIndex < this.$FixedDataTableRowBuffer_rowsCount && remainingBufferRows > 0) {
+	      this.$FixedDataTableRowBuffer_addRowToBuffer(
+	        bufferRowIndex,
+	        this.$FixedDataTableRowBuffer_viewportRowsBegin,
+	        this.$FixedDataTableRowBuffer_viewportRowsEnd - 1
+	      );
+	      bufferRowIndex++;
+	      remainingBufferRows--;
+	    }
+	    return this.$FixedDataTableRowBuffer_rows;
+	  };
+
+	  FixedDataTableRowBuffer.prototype.getRows=function(
+	firstRowIndex,
+	    /*number*/ firstRowOffset)
+	    {
+	    var top = firstRowOffset;
+	    var totalHeight = top;
+	    var rowIndex = firstRowIndex;
+	    var endIndex =
+	      Math.min(firstRowIndex + this.$FixedDataTableRowBuffer_maxVisibleRowCount, this.$FixedDataTableRowBuffer_rowsCount);
+
+	    this.$FixedDataTableRowBuffer_viewportRowsBegin = firstRowIndex;
+	    while (rowIndex < endIndex ||
+	        (totalHeight < this.$FixedDataTableRowBuffer_viewportHeight && rowIndex < this.$FixedDataTableRowBuffer_rowsCount)) {
+	      this.$FixedDataTableRowBuffer_addRowToBuffer(
+	        rowIndex,
+	        firstRowIndex,
+	        endIndex - 1
+	      );
+	      totalHeight += this.$FixedDataTableRowBuffer_rowHeightGetter(rowIndex);
+	      ++rowIndex;
+	      // Store index after the last viewport row as end, to be able to
+	      // distinguish when there are no rows rendered in viewport
+	      this.$FixedDataTableRowBuffer_viewportRowsEnd = rowIndex;
+	    }
+
+	    return this.$FixedDataTableRowBuffer_rows;
+	  };
+
+	  FixedDataTableRowBuffer.prototype.$FixedDataTableRowBuffer_addRowToBuffer=function(
+	rowIndex,
+	    /*number*/ firstViewportRowIndex,
+	    /*number*/ lastViewportRowIndex)
+	   {
+	      var rowPosition = this.$FixedDataTableRowBuffer_bufferSet.getValuePosition(rowIndex);
+	      var viewportRowsCount = lastViewportRowIndex - firstViewportRowIndex + 1;
+	      var allowedRowsCount = viewportRowsCount + this.$FixedDataTableRowBuffer_bufferRowsCount * 2;
+	      if (rowPosition === null &&
+	          this.$FixedDataTableRowBuffer_bufferSet.getSize() >= allowedRowsCount) {
+	        rowPosition =
+	          this.$FixedDataTableRowBuffer_bufferSet.replaceFurthestValuePosition(
+	            firstViewportRowIndex,
+	            lastViewportRowIndex,
+	            rowIndex
+	          );
+	      }
+	      if (rowPosition === null) {
+	        // We can't reuse any of existing positions for this row. We have to
+	        // create new position
+	        rowPosition = this.$FixedDataTableRowBuffer_bufferSet.getNewPositionForValue(rowIndex);
+	        this.$FixedDataTableRowBuffer_rows[rowPosition] = rowIndex;
+	      } else {
+	        // This row already is in the table with rowPosition position or it
+	        // can replace row that is in that position
+	        this.$FixedDataTableRowBuffer_rows[rowPosition] = rowIndex;
+	      }
+	  };
+
+
+	module.exports = FixedDataTableRowBuffer;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule joinClasses
+	 * @typechecks static-only
+	 */
+
+	'use strict';
+
+	/**
+	 * Combines multiple className strings into one.
+	 * http://jsperf.com/joinclasses-args-vs-array
+	 *
+	 * @param {...?string} classes
+	 * @return {string}
+	 */
+	function joinClasses(className/*, ... */) {
+	  if (!className) {
+	    className = '';
+	  }
+	  var nextClass;
+	  var argLength = arguments.length;
+	  if (argLength > 1) {
+	    for (var ii = 1; ii < argLength; ii++) {
+	      nextClass = arguments[ii];
+	      if (nextClass) {
+	        className = (className ? className + ' ' : '') + nextClass;
+	      }
+	    }
+	  }
+	  return className;
+	}
+
+	module.exports = joinClasses;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * This class listens to events on the document and then updates a react
+	 * component through callbacks.
+	 * Please note that captureMouseMove must be called in
+	 * order to initialize listeners on mousemove and mouseup.
+	 * releaseMouseMove must be called to remove them. It is important to
+	 * call releaseMouseMoves since mousemove is expensive to listen to.
 	 *
 	 * @providesModule DOMMouseMoveTracker
 	 * @typechecks
@@ -3663,7 +3963,7 @@ var FixedDataTable =
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3704,7 +4004,7 @@ var FixedDataTable =
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3747,216 +4047,6 @@ var FixedDataTable =
 	cssVar.CSS_VARS = CSS_VARS;
 
 	module.exports = cssVar;
-
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright (c) 2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule FixedDataTableRowBuffer
-	 * @typechecks
-	 */
-	'use strict';
-
-	var IntegerBufferSet = __webpack_require__(52);
-
-	var clamp = __webpack_require__(43);
-	var invariant = __webpack_require__(34);
-	var MIN_BUFFER_ROWS = 5;
-	var MAX_BUFFER_ROWS = 15;
-
-	// FixedDataTableRowBuffer is a helper class that executes row buffering
-	// logic for FixedDataTable. It figures out which rows should be rendered
-	// and in which positions.
-
-	  function FixedDataTableRowBuffer(
-	rowsCount,
-	    /*number*/  defaultRowHeight,
-	    /*number*/ viewportHeight,
-	    /*?function*/ rowHeightGetter)
-	   {
-	    invariant(
-	      defaultRowHeight !== 0,
-	      "defaultRowHeight musn't be equal 0 in FixedDataTableRowBuffer"
-	    );
-
-	    this.$FixedDataTableRowBuffer_bufferSet = new IntegerBufferSet();
-	    this.$FixedDataTableRowBuffer_defaultRowHeight = defaultRowHeight;
-	    this.$FixedDataTableRowBuffer_viewportRowsBegin = 0;
-	    this.$FixedDataTableRowBuffer_viewportRowsEnd = 0;
-	    this.$FixedDataTableRowBuffer_maxVisibleRowCount = Math.ceil(viewportHeight / defaultRowHeight) + 1;
-	    this.$FixedDataTableRowBuffer_bufferRowsCount = clamp(
-	      MIN_BUFFER_ROWS,
-	      Math.floor(this.$FixedDataTableRowBuffer_maxVisibleRowCount/2),
-	      MAX_BUFFER_ROWS
-	    );
-	    this.$FixedDataTableRowBuffer_rowsCount = rowsCount;
-	    this.$FixedDataTableRowBuffer_rowHeightGetter = rowHeightGetter;
-	    this.$FixedDataTableRowBuffer_rows = [];
-	    this.$FixedDataTableRowBuffer_viewportHeight = viewportHeight;
-
-	    this.getRows = this.getRows.bind(this);
-	    this.getRowsWithUpdatedBuffer = this.getRowsWithUpdatedBuffer.bind(this);
-	  }
-
-	  FixedDataTableRowBuffer.prototype.getRowsWithUpdatedBuffer=function()  {
-	    var remainingBufferRows = 2 * this.$FixedDataTableRowBuffer_bufferRowsCount;
-	    var bufferRowIndex =
-	      Math.max(this.$FixedDataTableRowBuffer_viewportRowsBegin - this.$FixedDataTableRowBuffer_bufferRowsCount, 0);
-	    while (bufferRowIndex < this.$FixedDataTableRowBuffer_viewportRowsBegin) {
-	      this.$FixedDataTableRowBuffer_addRowToBuffer(
-	        bufferRowIndex,
-	        this.$FixedDataTableRowBuffer_viewportHeight,
-	        this.$FixedDataTableRowBuffer_viewportRowsBegin,
-	        this.$FixedDataTableRowBuffer_viewportRowsEnd -1
-	      );
-	      bufferRowIndex++;
-	      remainingBufferRows--;
-	    }
-	    bufferRowIndex = this.$FixedDataTableRowBuffer_viewportRowsEnd;
-	    while (bufferRowIndex < this.$FixedDataTableRowBuffer_rowsCount && remainingBufferRows > 0) {
-	      this.$FixedDataTableRowBuffer_addRowToBuffer(
-	        bufferRowIndex,
-	        this.$FixedDataTableRowBuffer_viewportHeight,
-	        this.$FixedDataTableRowBuffer_viewportRowsBegin,
-	        this.$FixedDataTableRowBuffer_viewportRowsEnd -1
-	      );
-	      bufferRowIndex++;
-	      remainingBufferRows--;
-	    }
-	    return this.$FixedDataTableRowBuffer_rows;
-	  };
-
-	  FixedDataTableRowBuffer.prototype.getRows=function(
-	firstRowIndex,
-	    /*number*/ firstRowOffset)
-	    {
-	    // Update offsets of all rows to move them outside of viewport. Later we
-	    // will bring rows that we should show to their right offsets.
-	    this.$FixedDataTableRowBuffer_hideAllRows();
-
-	    var top = firstRowOffset;
-	    var totalHeight = top;
-	    var rowIndex = firstRowIndex;
-	    var endIndex =
-	      Math.min(firstRowIndex + this.$FixedDataTableRowBuffer_maxVisibleRowCount, this.$FixedDataTableRowBuffer_rowsCount);
-
-	    this.$FixedDataTableRowBuffer_viewportRowsBegin = firstRowIndex;
-	    while (rowIndex < endIndex ||
-	        (totalHeight < this.$FixedDataTableRowBuffer_viewportHeight && rowIndex < this.$FixedDataTableRowBuffer_rowsCount)) {
-	      this.$FixedDataTableRowBuffer_addRowToBuffer(
-	        rowIndex,
-	        totalHeight,
-	        firstRowIndex,
-	        endIndex - 1
-	      );
-	      totalHeight += this.$FixedDataTableRowBuffer_rowHeightGetter(rowIndex);
-	      ++rowIndex;
-	      // Store index after the last viewport row as end, to be able to
-	      // distinguish when there are no rows rendered in viewport
-	      this.$FixedDataTableRowBuffer_viewportRowsEnd = rowIndex;
-	    }
-
-	    return this.$FixedDataTableRowBuffer_rows;
-	  };
-
-	  FixedDataTableRowBuffer.prototype.$FixedDataTableRowBuffer_addRowToBuffer=function(
-	rowIndex,
-	    /*number*/ offsetTop,
-	    /*number*/ firstViewportRowIndex,
-	    /*number*/ lastViewportRowIndex)
-	   {
-	      var rowPosition = this.$FixedDataTableRowBuffer_bufferSet.getValuePosition(rowIndex);
-	      var viewportRowsCount = lastViewportRowIndex - firstViewportRowIndex + 1;
-	      var allowedRowsCount = viewportRowsCount + this.$FixedDataTableRowBuffer_bufferRowsCount * 2;
-	      if (rowPosition === null &&
-	          this.$FixedDataTableRowBuffer_bufferSet.getSize() >= allowedRowsCount) {
-	        rowPosition =
-	          this.$FixedDataTableRowBuffer_bufferSet.replaceFurthestValuePosition(
-	            firstViewportRowIndex,
-	            lastViewportRowIndex,
-	            rowIndex
-	          );
-	      }
-	      if (rowPosition === null) {
-	        // We can't reuse any of existing positions for this row. We have to
-	        // create new position
-	        rowPosition = this.$FixedDataTableRowBuffer_bufferSet.getNewPositionForValue(rowIndex);
-	        this.$FixedDataTableRowBuffer_rows[rowPosition] = {
-	          rowIndex:rowIndex,
-	          offsetTop:offsetTop,
-	        };
-	      } else {
-	        // This row already is in the table with rowPosition position or it
-	        // can replace row that is in that position
-	        this.$FixedDataTableRowBuffer_rows[rowPosition].rowIndex = rowIndex;
-	        this.$FixedDataTableRowBuffer_rows[rowPosition].offsetTop = offsetTop;
-	      }
-	  };
-
-	  FixedDataTableRowBuffer.prototype.$FixedDataTableRowBuffer_hideAllRows=function() {
-	    var i = this.$FixedDataTableRowBuffer_rows.length - 1;
-	    while (i > -1) {
-	      this.$FixedDataTableRowBuffer_rows[i].offsetTop = this.$FixedDataTableRowBuffer_viewportHeight;
-	      i--;
-	    }
-	  };
-
-
-	module.exports = FixedDataTableRowBuffer;
-
-
-/***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright (c) 2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule joinClasses
-	 * @typechecks static-only
-	 */
-
-	'use strict';
-
-	/**
-	 * Combines multiple className strings into one.
-	 * http://jsperf.com/joinclasses-args-vs-array
-	 *
-	 * @param {...?string} classes
-	 * @return {string}
-	 */
-	function joinClasses(className/*, ... */) {
-	  if (!className) {
-	    className = '';
-	  }
-	  var nextClass;
-	  var argLength = arguments.length;
-	  if (argLength > 1) {
-	    for (var ii = 1; ii < argLength; ii++) {
-	      nextClass = arguments[ii];
-	      if (nextClass) {
-	        className = (className ? className + ' ' : '') + nextClass;
-	      }
-	    }
-	  }
-	  return className;
-	}
-
-	module.exports = joinClasses;
 
 
 /***/ },
@@ -4022,7 +4112,7 @@ var FixedDataTable =
 	var renderToString = FixedDataTableHelper.renderToString;
 	var translateDOMPositionXY = __webpack_require__(36);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	var EMPTY_OBJECT = new ImmutableObject({});
 
@@ -4368,7 +4458,7 @@ var FixedDataTable =
 
 
 	module.exports = PrefixIntervalTree;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -4597,7 +4687,7 @@ var FixedDataTable =
 	requestAnimationFrame(emptyFunction);
 
 	module.exports = requestAnimationFrame;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -4826,7 +4916,7 @@ var FixedDataTable =
 	  global.clearTimeout;
 
 	module.exports = cancelAnimationFrame;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -5224,9 +5314,9 @@ var FixedDataTable =
 
 	var cloneWithProps = __webpack_require__(30);
 	var cx = __webpack_require__(31);
-	var joinClasses = __webpack_require__(42);
+	var joinClasses = __webpack_require__(39);
 
-	var PropTypes = React.PropTypes;
+	var $__0=  React,PropTypes=$__0.PropTypes;
 
 	var DEFAULT_PROPS = new ImmutableObject({
 	  align: 'left',
@@ -5374,7 +5464,10 @@ var FixedDataTable =
 
 	    var contentClass = cx('public/fixedDataTableCell/cellContent');
 	    if (React.isValidElement(content)) {
-	      content = cloneWithProps(content, {className: contentClass});
+	      content = cloneWithProps(content, {
+	        key: content.key,
+	        className: contentClass,
+	      });
 	    } else {
 	      content = React.createElement("div", {className: contentClass}, content);
 	    }
@@ -5810,7 +5903,7 @@ var FixedDataTable =
 	  global.msRequestAnimationFrame;
 
 	module.exports = nativeRequestAnimationFrame;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -5915,7 +6008,7 @@ var FixedDataTable =
 
 	"use strict";
 
-	var shallowEqual = __webpack_require__(72);
+	var shallowEqual = __webpack_require__(68);
 
 	/**
 	 * If your React component's render function is "pure", e.g. it will render the
@@ -5969,11 +6062,11 @@ var FixedDataTable =
 
 	"use strict";
 
-	var ReactElement = __webpack_require__(68);
-	var ReactPropTransferer = __webpack_require__(69);
+	var ReactElement = __webpack_require__(69);
+	var ReactPropTransferer = __webpack_require__(70);
 
-	var keyOf = __webpack_require__(70);
-	var warning = __webpack_require__(71);
+	var keyOf = __webpack_require__(71);
+	var warning = __webpack_require__(72);
 
 	var CHILDREN_PROP = keyOf({children: null});
 
@@ -6010,7 +6103,7 @@ var FixedDataTable =
 	}
 
 	module.exports = cloneWithProps;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(73)))
 
 /***/ },
@@ -6585,6 +6678,54 @@ var FixedDataTable =
 /* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule shallowEqual
+	 */
+
+	"use strict";
+
+	/**
+	 * Performs equality by iterating through keys on an object and returning
+	 * false when any key has values which are not strictly equal between
+	 * objA and objB. Returns true when the values of all keys are strictly equal.
+	 *
+	 * @return {boolean}
+	 */
+	function shallowEqual(objA, objB) {
+	  if (objA === objB) {
+	    return true;
+	  }
+	  var key;
+	  // Test for A's keys different from B.
+	  for (key in objA) {
+	    if (objA.hasOwnProperty(key) &&
+	        (!objB.hasOwnProperty(key) || objA[key] !== objB[key])) {
+	      return false;
+	    }
+	  }
+	  // Test for B's keys missing from A.
+	  for (key in objB) {
+	    if (objB.hasOwnProperty(key) && !objA.hasOwnProperty(key)) {
+	      return false;
+	    }
+	  }
+	  return true;
+	}
+
+	module.exports = shallowEqual;
+
+
+/***/ },
+/* 69 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/* WEBPACK VAR INJECTION */(function(process) {/**
 	 * Copyright 2014, Facebook, Inc.
 	 * All rights reserved.
@@ -6598,10 +6739,10 @@ var FixedDataTable =
 
 	"use strict";
 
-	var ReactContext = __webpack_require__(78);
-	var ReactCurrentOwner = __webpack_require__(79);
+	var ReactContext = __webpack_require__(74);
+	var ReactCurrentOwner = __webpack_require__(75);
 
-	var warning = __webpack_require__(71);
+	var warning = __webpack_require__(72);
 
 	var RESERVED_PROPS = {
 	  key: true,
@@ -6827,11 +6968,11 @@ var FixedDataTable =
 	};
 
 	module.exports = ReactElement;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(73)))
 
 /***/ },
-/* 69 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -6847,11 +6988,11 @@ var FixedDataTable =
 
 	"use strict";
 
-	var assign = __webpack_require__(75);
-	var emptyFunction = __webpack_require__(74);
-	var invariant = __webpack_require__(76);
-	var joinClasses = __webpack_require__(77);
-	var warning = __webpack_require__(71);
+	var assign = __webpack_require__(76);
+	var emptyFunction = __webpack_require__(77);
+	var invariant = __webpack_require__(78);
+	var joinClasses = __webpack_require__(79);
+	var warning = __webpack_require__(72);
 
 	var didWarn = false;
 
@@ -6997,11 +7138,11 @@ var FixedDataTable =
 	};
 
 	module.exports = ReactPropTransferer;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(73)))
 
 /***/ },
-/* 70 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7041,7 +7182,7 @@ var FixedDataTable =
 
 
 /***/ },
-/* 71 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -7057,7 +7198,7 @@ var FixedDataTable =
 
 	"use strict";
 
-	var emptyFunction = __webpack_require__(74);
+	var emptyFunction = __webpack_require__(77);
 
 	/**
 	 * Similar to invariant but only logs a warning if the condition is not met.
@@ -7085,56 +7226,8 @@ var FixedDataTable =
 	}
 
 	module.exports = warning;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(73)))
-
-/***/ },
-/* 72 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2014, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule shallowEqual
-	 */
-
-	"use strict";
-
-	/**
-	 * Performs equality by iterating through keys on an object and returning
-	 * false when any key has values which are not strictly equal between
-	 * objA and objB. Returns true when the values of all keys are strictly equal.
-	 *
-	 * @return {boolean}
-	 */
-	function shallowEqual(objA, objB) {
-	  if (objA === objB) {
-	    return true;
-	  }
-	  var key;
-	  // Test for A's keys different from B.
-	  for (key in objA) {
-	    if (objA.hasOwnProperty(key) &&
-	        (!objB.hasOwnProperty(key) || objA[key] !== objB[key])) {
-	      return false;
-	    }
-	  }
-	  // Test for B's keys missing from A.
-	  for (key in objB) {
-	    if (objB.hasOwnProperty(key) && !objA.hasOwnProperty(key)) {
-	      return false;
-	    }
-	  }
-	  return true;
-	}
-
-	module.exports = shallowEqual;
-
 
 /***/ },
 /* 73 */
@@ -7143,69 +7236,40 @@ var FixedDataTable =
 	// shim for using process in browser
 
 	var process = module.exports = {};
+	var queue = [];
+	var draining = false;
 
-	process.nextTick = (function () {
-	    var canSetImmediate = typeof window !== 'undefined'
-	    && window.setImmediate;
-	    var canMutationObserver = typeof window !== 'undefined'
-	    && window.MutationObserver;
-	    var canPost = typeof window !== 'undefined'
-	    && window.postMessage && window.addEventListener
-	    ;
-
-	    if (canSetImmediate) {
-	        return function (f) { return window.setImmediate(f) };
+	function drainQueue() {
+	    if (draining) {
+	        return;
 	    }
-
-	    var queue = [];
-
-	    if (canMutationObserver) {
-	        var hiddenDiv = document.createElement("div");
-	        var observer = new MutationObserver(function () {
-	            var queueList = queue.slice();
-	            queue.length = 0;
-	            queueList.forEach(function (fn) {
-	                fn();
-	            });
-	        });
-
-	        observer.observe(hiddenDiv, { attributes: true });
-
-	        return function nextTick(fn) {
-	            if (!queue.length) {
-	                hiddenDiv.setAttribute('yes', 'no');
-	            }
-	            queue.push(fn);
-	        };
+	    draining = true;
+	    var currentQueue;
+	    var len = queue.length;
+	    while(len) {
+	        currentQueue = queue;
+	        queue = [];
+	        var i = -1;
+	        while (++i < len) {
+	            currentQueue[i]();
+	        }
+	        len = queue.length;
 	    }
-
-	    if (canPost) {
-	        window.addEventListener('message', function (ev) {
-	            var source = ev.source;
-	            if ((source === window || source === null) && ev.data === 'process-tick') {
-	                ev.stopPropagation();
-	                if (queue.length > 0) {
-	                    var fn = queue.shift();
-	                    fn();
-	                }
-	            }
-	        }, true);
-
-	        return function nextTick(fn) {
-	            queue.push(fn);
-	            window.postMessage('process-tick', '*');
-	        };
+	    draining = false;
+	}
+	process.nextTick = function (fun) {
+	    queue.push(fun);
+	    if (!draining) {
+	        setTimeout(drainQueue, 0);
 	    }
-
-	    return function nextTick(fn) {
-	        setTimeout(fn, 0);
-	    };
-	})();
+	};
 
 	process.title = 'browser';
 	process.browser = true;
 	process.env = {};
 	process.argv = [];
+	process.version = ''; // empty string to avoid regexp issues
+	process.versions = {};
 
 	function noop() {}
 
@@ -7226,6 +7290,7 @@ var FixedDataTable =
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
 	};
+	process.umask = function() { return 0; };
 
 
 /***/ },
@@ -7240,34 +7305,100 @@ var FixedDataTable =
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 *
-	 * @providesModule emptyFunction
+	 * @providesModule ReactContext
 	 */
 
-	function makeEmptyFunction(arg) {
-	  return function() {
-	    return arg;
-	  };
-	}
+	"use strict";
+
+	var assign = __webpack_require__(76);
 
 	/**
-	 * This function accepts and discards inputs; it has no side effects. This is
-	 * primarily useful idiomatically for overridable function endpoints which
-	 * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+	 * Keeps track of the current context.
+	 *
+	 * The context is automatically passed down the component ownership hierarchy
+	 * and is accessible via `this.context` on ReactCompositeComponents.
 	 */
-	function emptyFunction() {}
+	var ReactContext = {
 
-	emptyFunction.thatReturns = makeEmptyFunction;
-	emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
-	emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
-	emptyFunction.thatReturnsNull = makeEmptyFunction(null);
-	emptyFunction.thatReturnsThis = function() { return this; };
-	emptyFunction.thatReturnsArgument = function(arg) { return arg; };
+	  /**
+	   * @internal
+	   * @type {object}
+	   */
+	  current: {},
 
-	module.exports = emptyFunction;
+	  /**
+	   * Temporarily extends the current context while executing scopedCallback.
+	   *
+	   * A typical use case might look like
+	   *
+	   *  render: function() {
+	   *    var children = ReactContext.withContext({foo: 'foo'}, () => (
+	   *
+	   *    ));
+	   *    return <div>{children}</div>;
+	   *  }
+	   *
+	   * @param {object} newContext New context to merge into the existing context
+	   * @param {function} scopedCallback Callback to run with the new context
+	   * @return {ReactComponent|array<ReactComponent>}
+	   */
+	  withContext: function(newContext, scopedCallback) {
+	    var result;
+	    var previousContext = ReactContext.current;
+	    ReactContext.current = assign({}, previousContext, newContext);
+	    try {
+	      result = scopedCallback();
+	    } finally {
+	      ReactContext.current = previousContext;
+	    }
+	    return result;
+	  }
+
+	};
+
+	module.exports = ReactContext;
 
 
 /***/ },
 /* 75 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactCurrentOwner
+	 */
+
+	"use strict";
+
+	/**
+	 * Keeps track of the current owner.
+	 *
+	 * The current owner is the component who should own any components that are
+	 * currently being constructed.
+	 *
+	 * The depth indicate how many composite components are above this render level.
+	 */
+	var ReactCurrentOwner = {
+
+	  /**
+	   * @internal
+	   * @type {ReactComponent}
+	   */
+	  current: null
+
+	};
+
+	module.exports = ReactCurrentOwner;
+
+
+/***/ },
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7318,7 +7449,45 @@ var FixedDataTable =
 
 
 /***/ },
-/* 76 */
+/* 77 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule emptyFunction
+	 */
+
+	function makeEmptyFunction(arg) {
+	  return function() {
+	    return arg;
+	  };
+	}
+
+	/**
+	 * This function accepts and discards inputs; it has no side effects. This is
+	 * primarily useful idiomatically for overridable function endpoints which
+	 * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+	 */
+	function emptyFunction() {}
+
+	emptyFunction.thatReturns = makeEmptyFunction;
+	emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
+	emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
+	emptyFunction.thatReturnsNull = makeEmptyFunction(null);
+	emptyFunction.thatReturnsThis = function() { return this; };
+	emptyFunction.thatReturnsArgument = function(arg) { return arg; };
+
+	module.exports = emptyFunction;
+
+
+/***/ },
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -7374,11 +7543,11 @@ var FixedDataTable =
 	};
 
 	module.exports = invariant;
-	
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(73)))
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7422,109 +7591,7 @@ var FixedDataTable =
 	module.exports = joinClasses;
 
 
-/***/ },
-/* 78 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2014, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactContext
-	 */
-
-	"use strict";
-
-	var assign = __webpack_require__(75);
-
-	/**
-	 * Keeps track of the current context.
-	 *
-	 * The context is automatically passed down the component ownership hierarchy
-	 * and is accessible via `this.context` on ReactCompositeComponents.
-	 */
-	var ReactContext = {
-
-	  /**
-	   * @internal
-	   * @type {object}
-	   */
-	  current: {},
-
-	  /**
-	   * Temporarily extends the current context while executing scopedCallback.
-	   *
-	   * A typical use case might look like
-	   *
-	   *  render: function() {
-	   *    var children = ReactContext.withContext({foo: 'foo'}, () => (
-	   *
-	   *    ));
-	   *    return <div>{children}</div>;
-	   *  }
-	   *
-	   * @param {object} newContext New context to merge into the existing context
-	   * @param {function} scopedCallback Callback to run with the new context
-	   * @return {ReactComponent|array<ReactComponent>}
-	   */
-	  withContext: function(newContext, scopedCallback) {
-	    var result;
-	    var previousContext = ReactContext.current;
-	    ReactContext.current = assign({}, previousContext, newContext);
-	    try {
-	      result = scopedCallback();
-	    } finally {
-	      ReactContext.current = previousContext;
-	    }
-	    return result;
-	  }
-
-	};
-
-	module.exports = ReactContext;
-
-
-/***/ },
-/* 79 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2014, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactCurrentOwner
-	 */
-
-	"use strict";
-
-	/**
-	 * Keeps track of the current owner.
-	 *
-	 * The current owner is the component who should own any components that are
-	 * currently being constructed.
-	 *
-	 * The depth indicate how many composite components are above this render level.
-	 */
-	var ReactCurrentOwner = {
-
-	  /**
-	   * @internal
-	   * @type {ReactComponent}
-	   */
-	  current: null
-
-	};
-
-	module.exports = ReactCurrentOwner;
-
-
 /***/ }
 /******/ ])
+});
+;
